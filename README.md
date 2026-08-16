@@ -1,8 +1,8 @@
 # Miden Paid Counter
 
-An experimental Miden-native counter contract inspired by the beginner rollup tutorial need tracked in [`0xMiden/examples#209`](https://github.com/0xMiden/examples/issues/209).
+A Miden-native paid counter contract inspired by the beginner rollup tutorial need tracked in [`0xMiden/examples#209`](https://github.com/0xMiden/examples/issues/209).
 
-The target is deliberately small and verifiable: keep a counter in account state and require a real note asset payment before a state update is accepted. The project is being built as an independent builder exercise first; it is **not** presented as an upstream Miden tutorial or completed testnet deployment yet.
+The project keeps a counter in account state and requires a real note asset payment before a state update is accepted. It is an independent builder project; it is **not** presented as an upstream Miden tutorial or completed testnet deployment yet.
 
 ## Why this project
 
@@ -14,21 +14,22 @@ For milestone 1, incrementing from `n` to `n + 1` requires a single fungible ass
 
 This rule is intentionally simple so both success and rejection paths are deterministic and testable. It is our builder design choice, not a claim about an official Miden standard.
 
-## Definition of done
+## Verified milestone
 
-The first milestone is complete only when all of the following are true:
+Milestone 1 is now backed by CI execution on GitHub Actions using the current repository dependency set.
 
 - [x] counter state is represented by a Miden account component
 - [x] a paid increment note path is implemented
 - [x] the implementation enforces a concrete payment rule in code
-- [ ] account and note packages build with the current Miden toolchain
-- [ ] successful payment increments the counter and retains the asset in the account vault
-- [ ] underpayment is rejected without incrementing state
-- [ ] multiple/no-asset malformed payment notes are rejected
-- [ ] tests are reproducible from documented commands
-- [ ] testnet execution evidence is recorded
+- [x] account and note packages build in CI
+- [x] a payment of 1 increments the committed counter from 0 to 1
+- [x] a second payment of 1 is rejected once the required payment rises to 2
+- [x] the rejected transaction leaves the committed counter at 1
+- [x] tests are reproducible through the repository CI workflow
+- [ ] explicit multiple/no-asset malformed-note coverage
+- [ ] testnet execution evidence
 
-Unchecked boxes remain unclaimed until backed by execution evidence.
+The behavior test was introduced through PR #1 and passed both on the pull-request branch and again on `main` after merge. Unchecked boxes remain unclaimed until backed by execution evidence.
 
 ## Current architecture
 
@@ -55,14 +56,9 @@ miden-paid-counter/
 ├── Cargo.toml
 ├── contracts/
 │   ├── paid-counter-account/
-│   │   ├── Cargo.toml
-│   │   ├── miden-project.toml
-│   │   └── src/lib.rs
 │   └── paid-increment-note/
-│       ├── Cargo.toml
-│       ├── miden-project.toml
-│       └── src/lib.rs
-├── integration/              # next: build + behavior tests
+├── integration/
+│   └── tests/                # package-build and payment-behavior coverage
 ├── evidence/
 │   └── README.md
 └── README.md
@@ -73,15 +69,15 @@ miden-paid-counter/
 ### Milestone 0 — need validated
 
 - Source need: [`0xMiden/examples#209`](https://github.com/0xMiden/examples/issues/209)
-- Duplicate/ownership check: the visible issue discussion does not claim the paid-counter idea.
-- Important duplicate discovery: the current official `project-template` already ships a basic `counter-account` and `increment-note`.
+- Duplicate/ownership check: the visible issue discussion did not claim the paid-counter idea when this builder exercise was selected.
+- Important duplicate discovery: the official `project-template` already ships a basic `counter-account` and `increment-note`.
 - Decision: do not clone that example; build the missing payment-gated extension instead.
 
-### Milestone 1 — implementation
+### Milestone 1 — implementation and verification
 
-Initial account and note packages are now in the repository. The implementation uses current documented Miden patterns including `active_note::get_assets()` for note assets and `native_account::add_asset()` for retaining payment in a custom account.
+The account and note packages implement an asset-backed payment gate. Integration coverage builds the packages, executes a valid paid increment through Miden's MockChain testing environment, commits the resulting block, reads the persisted counter state, and then verifies that an underpayment is rejected without changing committed state.
 
-**Status: implementation written; build/test validation still pending.** No local, CI, or testnet success claim is made yet.
+**Status: MockChain behavior milestone verified in CI. Testnet deployment/execution remains a separate future milestone and is not claimed here.**
 
 ## Relationship to upstream
 
