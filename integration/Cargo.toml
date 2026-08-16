@@ -6,6 +6,7 @@ edition.workspace = true
 [dependencies]
 cargo-miden = "0.9"
 miden-client = { version = "0.15", features = ["tonic"] }
+miden-core = "0.23"
 miden-standards = { version = "0.15", features = ["testing"] }
 miden-testing = "0.15"
 miden-mast-package = { version = "0.23", default-features = false }
