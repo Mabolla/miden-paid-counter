@@ -26,10 +26,19 @@ impl PaidCounter for PaidCounterStorage {
         let key = Word::new([felt!(0), felt!(0), felt!(0), felt!(1)]);
         let current_value = self.count_map.get(key);
         let required_payment = current_value + felt!(1);
-        let payment_amount = payment.inner[0];
+
+        // Miden SDK assets are encoded as separate key/value words. For fungible assets,
+        // the value word layout is [amount, 0, 0, 0].
+        assert!(
+            payment.value.b == felt!(0)
+                && payment.value.c == felt!(0)
+                && payment.value.d == felt!(0),
+            "payment must use a fungible-asset value layout"
+        );
+        let payment_amount = payment.value.a;
 
         assert!(
-            payment_amount.as_u64() >= required_payment.as_u64(),
+            payment_amount >= required_payment,
             "payment below required counter price"
         );
 
