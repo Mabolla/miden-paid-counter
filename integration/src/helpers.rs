@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::{bail, Context, Result};
 use cargo_miden::run;
-use miden_client::{account::StorageSlotName, Felt, Word};
+use miden_client::{account::StorageSlotName, Deserializable, Felt, Word};
 use miden_mast_package::Package;
 
 pub const COUNTER_STORAGE_KEY: Word =
