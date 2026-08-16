@@ -1,0 +1,15 @@
+[package]
+name = "paid-increment-note"
+version = "0.1.0"
+
+[lib]
+kind = "note"
+namespace = "miden:paid-increment-note/miden-paid-increment-note@0.1.0"
+
+[dependencies]
+miden-core = "*"
+miden-protocol = "*"
+paid-counter-account = { path = "../paid-counter-account" }
+
+[package.metadata.miden.dependencies]
+paid-counter-account = { wit = "../paid-counter-account/target/generated-wit/" }
