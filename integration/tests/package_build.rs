@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use integration::helpers::build_project_in_dir;
-use miden_core::mast::serialization::view::MastForestView;
+use miden_core::mast::MastForestView;
 
 #[test]
 fn paid_counter_packages_build() -> anyhow::Result<()> {
