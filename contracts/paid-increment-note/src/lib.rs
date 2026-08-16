@@ -4,7 +4,7 @@
 use miden::*;
 use crate::bindings::miden::paid_counter_account::paid_counter;
 
-#[account(paid_counter::PaidCounter)]
+#[account(paid_counter_account::PaidCounter)]
 pub struct CounterAccount;
 
 #[note]
