@@ -4,9 +4,13 @@ use anyhow::{bail, Context, Result};
 use cargo_miden::run;
 use miden_client::{
     account::{
-        component::{BasicWallet, InitStorageData, NoAuth},
+        component::{
+            BasicWallet, BurnPolicyConfig, FungibleFaucet, InitStorageData, MintPolicyConfig,
+            NoAuth, PolicyRegistration, TokenName, TokenPolicyManager,
+        },
         Account, AccountBuilder, AccountComponent, AccountType, StorageSlotName,
     },
+    asset::{AssetAmount, TokenSymbol},
     auth::{AuthSchemeId, AuthSecretKey, AuthSingleSig},
     builder::ClientBuilder,
     keystore::{FilesystemKeyStore, Keystore},
@@ -152,4 +156,46 @@ pub async fn create_basic_wallet_account(
         .context("failed to add sender key to keystore")?;
 
     Ok(account)
+}
+
+pub async fn create_fungible_faucet(
+    client: &mut Client<FilesystemKeyStore>,
+    keystore: Arc<FilesystemKeyStore>,
+) -> Result<Account> {
+    let mut init_seed = [0_u8; 32];
+    client.rng().fill_bytes(&mut init_seed);
+
+    let key_pair = AuthSecretKey::new_falcon512_poseidon2_with_rng(client.rng());
+    let faucet = AccountBuilder::new(init_seed)
+        .account_type(AccountType::Public)
+        .with_auth_component(AuthSingleSig::new(
+            key_pair.public_key().to_commitment(),
+            AuthSchemeId::Falcon512Poseidon2,
+        ))
+        .with_component(
+            FungibleFaucet::builder()
+                .name(TokenName::new("PAY")?)
+                .symbol(TokenSymbol::new("PAY")?)
+                .decimals(0)
+                .max_supply(AssetAmount::new(1_000_000)?)
+                .build()?,
+        )
+        .with_components(
+            TokenPolicyManager::new()
+                .with_mint_policy(MintPolicyConfig::AllowAll, PolicyRegistration::Active)?
+                .with_burn_policy(BurnPolicyConfig::AllowAll, PolicyRegistration::Active)?,
+        )
+        .build()
+        .context("failed to build PAY faucet")?;
+
+    client
+        .add_account(&faucet, false)
+        .await
+        .context("failed to add PAY faucet to client")?;
+    keystore
+        .add_key(&key_pair, faucet.id())
+        .await
+        .context("failed to add PAY faucet key to keystore")?;
+
+    Ok(faucet)
 }
