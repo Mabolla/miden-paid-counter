@@ -1,0 +1,20 @@
+name: Testnet E2E
+
+on:
+  push:
+    branches:
+      - feat/testnet-runner
+  workflow_dispatch:
+
+jobs:
+  testnet-paid-counter:
+    name: Run paid counter on Miden Testnet
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Rust toolchain
+        run: rustc --version
+      - name: Execute Testnet runner
+        working-directory: integration
+        run: cargo run --bin testnet_paid_counter
