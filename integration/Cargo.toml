@@ -5,13 +5,13 @@ edition.workspace = true
 
 [dependencies]
 cargo-miden = "0.9"
-miden-client = { version = "0.15", features = ["tonic"] }
+miden-client = { version = "0.15", features = ["testing", "tonic"] }
 miden-client-sqlite-store = { version = "0.15", package = "miden-client-sqlite-store" }
 miden-core = "0.23"
 miden-protocol = "0.15"
 miden-standards = { version = "0.15", features = ["testing"] }
 miden-testing = "0.15"
 miden-mast-package = { version = "0.23", default-features = false }
-tokio = { version = "1.48", features = ["rt-multi-thread", "macros", "fs"] }
+tokio = { version = "1.48", features = ["rt-multi-thread", "macros", "net", "fs", "time"] }
 rand = "0.9"
 anyhow = "1.0"
